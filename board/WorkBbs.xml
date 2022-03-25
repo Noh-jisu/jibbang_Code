@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="health.back.a.dao.WorkBbsDao" >
+ 
+ 	<!-- 게시판 전체 리스트 -->
+	<select id="getBbsList" resultType="health.back.a.dto.WorkBbsDto">
+		SELECT * FROM WORKBBS
+		WHERE DEL != 1
+		ORDER BY REF DESC, STEP ASC
+	</select>
+	
+	<!-- 게시판 글 작성 -->
+	<insert id="writeBbs" parameterType="health.back.a.dto.WorkBbsDto">
+		INSERT INTO WORKBBS(WORKBBSSEQ, ID, NICKNAME,
+							TITLE, CONTENT, WDATE,
+							REF, STEP, DEPTH,
+							DEL, READCOUNT, BBSLIKE, BBSIMAGE)
+		VALUES(				WORKBBSSEQ_WORKBBS.NEXTVAL, #{id}, #{nickname},
+							#{title}, #{content}, SYSDATE,
+							(SELECT NVL(MAX(REF)+1, 0) FROM WORKBBS), 0, 0,
+							0, 0, 0, #{bbsImage})
+	</insert>
+	
+	<!-- 선택한 게시글 불러오기(detail) -->
+	<select id="bbsDetail" parameterType="java.lang.Integer" resultType="health.back.a.dto.WorkBbsDto">
+		SELECT * FROM WORKBBS
+		WHERE WORKBBSSEQ=#{seq}
+	</select>
+	
+	<!-- 게시판 글 수정 -->
+	<update id="updateBbs" parameterType="health.back.a.dto.WorkBbsDto">
+		UPDATE WORKBBS
+		SET TITLE=#{title}, CONTENT=#{content}, BBSIMAGE=#{bbsImage}
+		WHERE WORKBBSSEQ=#{seq}
+	</update>
+	
+	<!-- 게시판 글 삭제 -->
+	<update id="deleteBbs" parameterType="java.lang.Integer">
+		UPDATE WORKBBS
+		SET DEL=1
+		WHERE WORKBBSSEQ=#{seq}
+	</update>
+	
+	<!-- 게시판 조회수 기능 -->
+	<update id="readcount" parameterType="java.lang.Integer">
+		UPDATE WORKBBS
+		SET READCOUNT=READCOUNT+1
+		WHERE WORKBBSSEQ=#{seq}
+	</update>
+	
+	<!-- 게시판 검색기능 -->
+	<select id="getBbsListSearch" parameterType="health.back.a.dto.WorkBbsParam" resultType="health.back.a.dto.WorkBbsDto">
+		SELECT * FROM WORKBBS
+		WHERE 1=1
+			<if test="choice != null and choice != '' and search != null and search != '' ">
+				<if test="choice == 'title'">
+					 AND TITLE LIKE '%'||#{search}||'%'
+				</if>
+				<if test="choice == 'content'">
+					 AND CONTENT LIKE '%'||#{search}||'%'
+				</if>
+				<if test="choice == 'writer'">
+					 AND ID=#{search}
+				</if>
+			</if> 
+		ORDER BY REF DESC, STEP ASC
+	</select>
+	
+	<!-- 게시판 페이징 기능 -->
+	<select id="getBbsListSearchPage" parameterType="health.back.a.dto.WorkBbsParam" resultType="health.back.a.dto.WorkBbsDto">					
+		SELECT *
+		FROM
+			(SELECT ROW_NUMBER()OVER(ORDER BY REF DESC, STEP ASC) AS RNUM, 
+				*
+			FROM WORKBBS
+			WHERE 1=1
+				<if test="choice != null and choice != '' and search != null and search != '' ">
+					<if test="choice == 'title'">
+						 AND TITLE LIKE '%'||#{search}||'%'
+					</if>
+					<if test="choice == 'content'">
+						 AND CONTENT LIKE '%'||#{search}||'%'
+					</if>
+					<if test="choice == 'writer'">
+						 AND ID=#{search}
+					</if>
+				</if> 
+			ORDER BY REF DESC, STEP ASC)
+		WHERE RNUM BETWEEN ${start} AND ${end}
+	</select>
+	
+	<!-- 게시판 글 총 갯수 -->
+	<select id="getBbsCount" parameterType="health.back.a.dto.WorkBbsParam" resultType="java.lang.Integer">
+		SELECT NVL(COUNT(*), 0) AS CNT
+		FROM WORKBBS
+		WHERE 1=1
+			<if test="choice != null and choice != '' and search != null and search != '' ">
+				<if test="choice == 'title'">
+					 AND TITLE LIKE '%'||#{search}||'%'
+				</if>
+				<if test="choice == 'content'">
+					 AND CONTENT LIKE '%'||#{search}||'%'
+				</if>
+				<if test="choice == 'writer'">
+					 AND ID=#{search}
+				</if>
+			</if> 
+	</select>
+ 
+ </mapper>
