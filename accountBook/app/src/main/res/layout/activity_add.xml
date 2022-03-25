@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".AddActivity">
+
+    <TextView
+            android:id="@+id/addTitle"
+            android:text="입/출내역 작성"
+            android:layout_width="318dp"
+            android:layout_height="53dp"
+            android:textSize="40sp"
+            android:gravity="center"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="16dp"
+    />
+    <RadioGroup
+            android:id="@+id/radioGroup"
+            android:layout_width="262dp"
+            android:layout_height="54dp"
+            android:orientation="horizontal"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/addTitle"
+            android:layout_marginTop="32dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.21" >
+        <RadioButton
+                android:text="수입"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/income"/>
+        <RadioButton
+                android:text="지출"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:id="@+id/expense"/>
+    </RadioGroup>
+    <TextView
+            android:id="@+id/titleTitle"
+            android:text="제목"
+            android:layout_width="81dp"
+            android:layout_height="38dp"
+            android:textSize="25sp"
+            app:layout_constraintTop_toBottomOf="@+id/radioGroup"
+            app:layout_constraintStart_toStartOf="@+id/radioGroup" android:layout_marginTop="20dp"/>
+    <EditText
+            android:layout_width="455dp"
+            android:layout_height="45dp"
+            android:inputType="textPersonName"
+            android:ems="10"
+            app:layout_constraintTop_toBottomOf="@+id/titleTitle"
+            app:layout_constraintStart_toStartOf="@+id/titleTitle" android:layout_marginTop="8dp"
+            android:id="@+id/wirteTitle"/>
+    <TextView
+            android:id="@+id/choiceDate"
+            android:text="날짜"
+            android:layout_width="81dp"
+            android:layout_height="38dp"
+            android:textSize="25sp"
+            app:layout_constraintTop_toBottomOf="@+id/wirteTitle"
+            app:layout_constraintStart_toStartOf="@+id/wirteTitle"
+            app:layout_constraintEnd_toEndOf="@+id/titleTitle" android:layout_marginTop="20dp"
+            app:layout_constraintHorizontal_bias="0.0"/>
+    <DatePicker
+            android:id="@+id/datePicker"
+            android:layout_width="308dp"
+            android:layout_height="93dp"
+            android:calendarViewShown="false"
+            android:datePickerMode="spinner"
+            app:layout_constraintTop_toBottomOf="@+id/choiceDate"
+            android:layout_marginTop="8dp" app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="32dp"/>
+    <TextView
+            android:id="@+id/priceTitle"
+            android:text="금액"
+            android:layout_width="81dp"
+            android:layout_height="38dp"
+            android:textSize="25sp"
+            app:layout_constraintStart_toStartOf="@+id/choiceDate"
+            app:layout_constraintEnd_toEndOf="@+id/choiceDate" app:layout_constraintTop_toBottomOf="@+id/datePicker"
+            app:layout_constraintHorizontal_bias="0.0" android:layout_marginTop="20dp"/>
+    <EditText
+            android:layout_width="455dp"
+            android:layout_height="45dp"
+            android:inputType="textPersonName"
+            android:ems="10"
+            android:id="@+id/writePrice"
+            app:layout_constraintTop_toBottomOf="@+id/priceTitle"
+            app:layout_constraintStart_toStartOf="@+id/priceTitle" android:layout_marginTop="8dp"/>
+    <TextView
+            android:id="@+id/contentTitle"
+            android:text="내용"
+            android:layout_width="81dp"
+            android:layout_height="38dp"
+            android:textSize="25sp"
+            app:layout_constraintStart_toStartOf="@+id/writePrice"
+            app:layout_constraintEnd_toEndOf="@+id/priceTitle"
+            app:layout_constraintTop_toBottomOf="@+id/writePrice"
+            app:layout_constraintHorizontal_bias="0.0" android:layout_marginTop="20dp"/>
+    <EditText
+            android:layout_width="455dp"
+            android:layout_height="130dp"
+            android:inputType="textPersonName"
+            android:ems="10"
+            android:gravity="top"
+            android:id="@+id/writeContent"
+            app:layout_constraintTop_toBottomOf="@+id/contentTitle"
+            app:layout_constraintStart_toStartOf="@+id/contentTitle" android:layout_marginTop="8dp"/>
+    <Button
+            android:text="작성하기"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:id="@+id/writeBtn"
+            app:layout_constraintEnd_toEndOf="@+id/writeContent"
+            app:layout_constraintTop_toBottomOf="@+id/writeContent" android:layout_marginTop="8dp"/>
+    <Button
+            android:text="메인으로"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:id="@+id/addToMain"
+            app:layout_constraintTop_toTopOf="@+id/writeBtn" app:layout_constraintEnd_toStartOf="@+id/writeBtn"
+            android:layout_marginEnd="16dp"/>
+</androidx.constraintlayout.widget.ConstraintLayout>
