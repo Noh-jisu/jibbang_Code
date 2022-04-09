@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="health.back.a.dao.WorkBbsDao" >
+ 
+ 	<!-- 게시판 전체 리스트 -->
+	<select id="getBbsList" resultType="health.back.a.dto.WorkBbsDto">
+		SELECT *
+		FROM WORKBBS
+		WHERE DEL != 1
+		ORDER BY REF DESC, STEP ASC
+	</select>
+	
+	<!-- 게시판 글 작성 -->
+	<insert id="writeBbs" parameterType="health.back.a.dto.WorkBbsDto">
+		INSERT INTO WORKBBS(WORKBBSSEQ, ID, NICKNAME,
+							TITLE, CONTENT, WDATE,
+							REF, STEP, DEPTH,
+							DEL, READCOUNT, BBSLIKE, BBSIMAGE)
+		VALUES(				WORKBBSSEQ_WORKBBS.NEXTVAL, #{id}, #{nickname},
+							#{title}, #{content}, SYSDATE,
+							(SELECT NVL(MAX(REF)+1, 0) FROM WORKBBS), 0, 0,
+							0, 0, 0, #{bbsImage})
+	</insert>
+	
+	<!-- 선택한 게시글 불러오기(detail) -->
+	<select id="bbsDetail" parameterType="java.lang.Integer" resultType="health.back.a.dto.WorkBbsDto">
+		SELECT * FROM WORKBBS
+		WHERE WORKBBSSEQ=#{seq}
+	</select>
+	
+	<!-- 게시판 글 수정 -->
+	<update id="updateBbs" parameterType="health.back.a.dto.WorkBbsDto">
+		UPDATE WORKBBS
+		SET TITLE=#{title}, CONTENT=#{content}, BBSIMAGE=#{bbsImage}
+		WHERE WORKBBSSEQ=#{seq}
+	</update>
+	
+	<!-- 게시판 글 삭제 -->
+	<update id="deleteBbs" parameterType="java.lang.Integer">
+		UPDATE WORKBBS
+		SET DEL=1
+		WHERE WORKBBSSEQ=#{seq}
+	</update>
+	
+	<!-- 게시판 조회수 기능 -->
+	<update id="readcount" parameterType="java.lang.Integer">
+		UPDATE WORKBBS
+		SET READCOUNT=READCOUNT+1
+		WHERE WORKBBSSEQ=#{seq}
+	</update>
+	
+	<!-- 동일 게시글 조회 여부 확인 -->
+	<select id="checkReadCount" parameterType="health.back.a.dto.ReadCountBbsDto" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM READCOUNTBBS
+		WHERE BBS_SEQ = #{bbs_seq} AND USER_ID = #{user_id}
+	</select>
+	
+	<!-- 게시글 조회시 유저id와 게시글 seq번호 저장 -->
+	<insert id="readCountInfo" parameterType="health.back.a.dto.ReadCountBbsDto">
+	 INSERT INTO READCOUNTBBS(BBS_SEQ, USER_ID)
+	 VALUES(#{bbs_seq}, #{user_id}) 
+	</insert>
+	
+	<!-- 동일 게시글 좋아요 여부 확인 -->
+	<select id="checkLikeCount" parameterType="health.back.a.dto.LikeBbsDto" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM LIKEBBS
+		WHERE BBS_NO = #{bbs_no} AND USER_ID = #{user_id}
+	</select>
+	
+	<!-- 게시판 좋아요 기능 -->
+	<update id="likeCount" parameterType="java.lang.Integer">
+		UPDATE WORKBBS
+		SET BBSLIKE=BBSLIKE+1
+		WHERE WORKBBSSEQ=#{seq}
+	</update>
+	
+	<insert id="likeInfo" parameterType="health.back.a.dto.LikeBbsDto">
+		INSERT INTO LIKEBBS(BBS_NO, USER_ID)
+		VALUES(#{bbs_no}, #{user_id})
+	</insert>
+	
+	<!-- 게시판 좋아요 취소기능 -->
+	<update id="likeCountCancel" parameterType="java.lang.Integer">
+		UPDATE WORKBBS
+		SET BBSLIKE=BBSLIKE-1
+		WHERE WORKBBSSEQ=#{seq}
+	</update>
+	
+	<delete id="likeCancel" parameterType="health.back.a.dto.LikeBbsDto">
+		DELETE FROM LIKEBBS
+		WHERE BBS_NO = #{bbs_no} AND USER_ID = #{user_id}
+	</delete>
+	
+	<!-- 게시판 검색기능 -->
+	<select id="getBbsListSearch" parameterType="health.back.a.dto.WorkBbsParam" resultType="health.back.a.dto.WorkBbsDto">
+		SELECT * FROM WORKBBS
+		WHERE DEL != 1
+			<if test="choice != null and choice != '' and search != null and search != '' ">
+				<if test="choice == 'title'">
+					 AND TITLE LIKE '%'||#{search}||'%'
+				</if>
+				<if test="choice == 'content'">
+					 AND CONTENT LIKE '%'||#{search}||'%'
+				</if>
+				<if test="choice == 'writer'">
+					 AND NICKNAME LIKE '%'||#{search}||'%'
+				</if>
+			</if> 
+		ORDER BY REF DESC, STEP ASC
+	</select>
+	
+	<!-- 게시판 페이징 기능 -->
+	<select id="getBbsListSearchPage" parameterType="health.back.a.dto.WorkBbsParam" resultType="health.back.a.dto.WorkBbsDto">					
+		SELECT WORKBBSSEQ, ID, NICKNAME, TITLE, CONTENT, REF, STEP, DEPTH, DEL, WDATE, READCOUNT, BBSLIKE, BBSIMAGE
+		FROM
+			(SELECT ROW_NUMBER()OVER(ORDER BY REF DESC, STEP ASC) AS RNUM,
+				WORKBBSSEQ, ID, NICKNAME, TITLE, CONTENT, REF, STEP, DEPTH, DEL, WDATE, READCOUNT, BBSLIKE, BBSIMAGE
+			FROM WORKBBS
+			WHERE DEL != 1
+				<if test="choice != null and choice != '' and search != null and search != '' ">
+					<if test="choice == 'title'">
+						 AND TITLE LIKE '%'||#{search}||'%'
+					</if>
+					<if test="choice == 'content'">
+						 AND CONTENT LIKE '%'||#{search}||'%'
+					</if>
+					<if test="choice == 'writer'">
+						 AND ID=#{search}
+					</if>
+				</if> 
+			ORDER BY REF DESC, STEP ASC)
+		WHERE RNUM BETWEEN ${start} AND ${end}
+	</select>
+	
+	<!-- 게시판 글 총 갯수 -->
+	<select id="getBbsCount" parameterType="health.back.a.dto.WorkBbsParam" resultType="java.lang.Integer">
+		SELECT NVL(COUNT(*), 0) AS CNT
+		FROM WORKBBS
+		WHERE 1=1
+			<if test="choice != null and choice != '' and search != null and search != '' ">
+				<if test="choice == 'title'">
+					 AND TITLE LIKE '%'||#{search}||'%'
+				</if>
+				<if test="choice == 'content'">
+					 AND CONTENT LIKE '%'||#{search}||'%'
+				</if>
+				<if test="choice == 'writer'">
+					 AND ID=#{search}
+				</if>
+			</if> 
+	</select>
+ 
+ </mapper>
